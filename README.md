@@ -1,4 +1,4 @@
-# Almban  
+# Āḷmban  
 
 **Almban** is an AI-powered emotional support platform designed to help people feel heard, supported, and understood.  
 Our mission is to build a safe space where users can share their struggles and receive empathetic, human-like responses powered by AI.  
