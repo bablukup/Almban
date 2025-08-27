@@ -1,12 +1,70 @@
-# React + Vite
+# Āḷmban Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Āḷmban is an AI-powered emotional support platform designed to create a safe and empathetic space where users feel heard, supported, and understood.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features (Frontend MVP)
 
-## Expanding the ESLint configuration
+- 🤝 **Simple and secure emotional support chat interface**
+- 📱 **Mobile-first responsive design** offering an app-like experience
+- 🛡️ **Strong commitment to user privacy and safety**
+- 🚨 **Emergency redirection** to trusted contacts and resources when needed
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## Technology Stack
+
+- **Framework:** React.js
+- **Styling:** Tailwind CSS (or your preferred CSS framework)
+- **State Management:** React Context API (or Redux, if applicable)
+- **Animations:** Framer Motion (if used)
+- **Bundler:** Vite (if applicable)
+
+---
+
+## Getting Started
+
+Follow these steps to set up and run the frontend locally:
+
+```bash
+# Clone this repository
+git clone https://github.com/bablukup/Almban
+
+# Navigate into frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+Open your browser and go to http://localhost:5173 to see the app in action.
+
+Project Structure
+
+frontend/
+│
+├── public/           # Static public files like index.html, favicon, etc.
+├── src/              # Source code
+│   ├── components/   # Reusable React components
+│   ├── pages/        # Page components for routing
+│   ├── styles/       # CSS or styling files
+│   ├── context/      # React Context providers (if used)
+│   └── App.jsx       # Main app component
+├── package.json      # NPM dependencies and scripts
+└── README.md         # Project documentation
+How to Use
+After login or signup, users can access the chat interface to receive emotional support.
+
+The UI adapts smoothly to mobile and desktop screens for a seamless experience.
+
+Emergency support options redirect users to trusted contacts or resources if needed.
+
+Contribution
+This project is in its early stages. Contributions to enhance the frontend, fix bugs, or add new features are very welcome!
+Please fork the repo and submit a pull request.
+
+License
+This project is licensed under the MIT License.
+```
