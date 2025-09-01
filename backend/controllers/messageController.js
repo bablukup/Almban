@@ -192,7 +192,10 @@ exports.getRecentMessages = async (req, res) => {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 20;
 
-    const messages = await Message.getRecentByUser(userId, Math.min(limit, 50));
+    const messages = await Message.getRecentByIdUser(
+      userId,
+      Math.min(limit, 50)
+    );
 
     return sendResponse(
       res,
