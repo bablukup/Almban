@@ -1,9 +1,4 @@
-const {
-  Message,
-  Emotion,
-  Context,
-  UserPreferences,
-} = require("../models/Message");
+const { Message, Emotion, Context, UserPreferences } = require("../models/Message");
 const emotionAnalyzer = require("../utils/emotionAnalyzer");
 const aiResponse = require("../utils/aiResponse");
 const contextManager = require("../utils/contextManager");
@@ -56,60 +51,56 @@ exports.createMessage = async (req, res) => {
   try {
     const { text, sessionId, messageType = "text" } = req.body;
     const userId = req.user.id;
+    const startTime = Date.now(); // Start response time tracking
 
-    // Enhanced input validation
+    // 1. Input Validation and Sanitization
     if (!text || !sessionId) {
       clearTimeout(timeout);
       return sendResponse(res, 400, false, "Missing required fields");
     }
-
-    // Sanitize input
     const sanitizedText = sanitizer.sanitizeText(text);
 
-    if (sanitizedText.length > 4000) {
-      clearTimeout(timeout);
-      return sendResponse(
-        res,
-        400,
-        false,
-        "Message text too long (max 4000 characters)"
-      );
-    }
+    // 2. AI Logic: Fetch Context, Preferences, and Emotion together
+    const [userPreferences, conversationContext] = await Promise.all([
+      // A. Fetch User Preferences
+      UserPreferences.findOne({ userId }),
+      // B. Fetch Conversation History Summary
+      contextManager.getSummary(sessionId, userId),
+    ]);
 
-    //  Analyze emotion
+    // 3. Analyze Emotion from User's Message
     const emotionData = await emotionAnalyzer.analyze(sanitizedText);
 
-    // Generate AI response
+    // 4. Generate AI Response
     const aiData = await aiResponse.generate(sanitizedText, {
       userId,
       sessionId,
       emotion: emotionData,
+      preferences: userPreferences,
+      context: conversationContext,
     });
 
-    //  Create emotion record
+    // 5. Save new records in Database (Emotion, Context, Message)
+    // A. Create Emotion record
     const emotion = new Emotion({
       emotion: emotionData.emotion,
       intensity: emotionData.intensity,
       emotionPatternFlags: emotionData.patterns || [],
       sarcasmDetected: emotionData.sarcasm || false,
-      confidence: emotionData.confidence || 0.8,
+      confidence: aiData.confidence || 0.8,
     });
-
     const savedEmotion = await emotion.save();
 
-    // Enhanced metadata collection
-    const quickMetadata = {
-      deviceType: req.headers["user-agent"]?.includes("Mobile")
-        ? "mobile"
-        : "desktop",
-      browser: req.headers["user-agent"],
-      messageLength: sanitizedText.length,
-      emojiCount: (sanitizedText.match(/[\p{Emoji}]/gu) || []).length,
-      emojiList: sanitizedText.match(/[\p{Emoji}]/gu)?.slice(0, 10) || [],
-      responseTime: Date.now() - req._startTime,
-    };
+    // B. Update or Save Context record
+    await contextManager.saveContext({
+      userId,
+      sessionId,
+      messageText: sanitizedText,
+      aiResponse: aiData.response,
+      emotion: emotionData.emotion,
+    });
 
-    // Create message with enhanced metadata
+    // C. Create Main Message record
     const newMessage = new Message({
       userId,
       text: sanitizedText,
@@ -117,7 +108,14 @@ exports.createMessage = async (req, res) => {
       sessionId,
       messageType,
       emotionId: savedEmotion._id,
-      quickMetadata,
+      quickMetadata: {
+        responseTime: Date.now() - startTime,
+        deviceType: req.headers["user-agent"]?.includes("Mobile") ? "mobile" : "desktop",
+        browser: req.headers["user-agent"],
+        messageLength: sanitizedText.length,
+        emojiCount: (sanitizedText.match(/[\p{Emoji}]/gu) || []).length,
+        emojiList: sanitizedText.match(/[\p{Emoji}]/gu)?.slice(0, 10) || [],
+      },
       feedback: {
         aiConfidence: aiData.confidence || 0.8,
       },
@@ -126,14 +124,9 @@ exports.createMessage = async (req, res) => {
     const savedMessage = await newMessage.save();
     await savedMessage.populate("emotionId");
 
+    // 6. Send Response
     clearTimeout(timeout);
-    return sendResponse(
-      res,
-      201,
-      true,
-      "Message created successfully",
-      savedMessage
-    );
+    return sendResponse(res, 201, true, "Message created successfully", savedMessage);
   } catch (error) {
     clearTimeout(timeout);
     return handleError(res, error, "Failed to create message");
@@ -174,13 +167,10 @@ exports.getMessages = async (req, res) => {
       hasPrevPage: pageNum > 1,
     };
 
-    return sendResponse(
-      res,
-      200,
-      true,
-      `Retrieved ${messages.length} messages`,
-      { messages, pagination }
-    );
+    return sendResponse(res, 200, true, `Retrieved ${messages.length} messages`, {
+      messages,
+      pagination,
+    });
   } catch (error) {
     return handleError(res, error, "Failed to retrieve messages");
   }
@@ -192,18 +182,9 @@ exports.getRecentMessages = async (req, res) => {
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 20;
 
-    const messages = await Message.getRecentByIdUser(
-      userId,
-      Math.min(limit, 50)
-    );
+    const messages = await Message.getRecentByIdUser(userId, Math.min(limit, 50));
 
-    return sendResponse(
-      res,
-      200,
-      true,
-      `Retrieved ${messages.length} recent messages`,
-      messages
-    );
+    return sendResponse(res, 200, true, `Retrieved ${messages.length} recent messages`, messages);
   } catch (error) {
     return handleError(res, error, "Failed to retrieve recent messages");
   }
@@ -215,21 +196,13 @@ exports.getMessageById = async (req, res) => {
     const { messageId } = req.params;
     const userId = req.user.id;
 
-    const message = await Message.findOne({ _id: messageId, userId }).populate(
-      "emotionId"
-    );
+    const message = await Message.findOne({ _id: messageId, userId }).populate("emotionId");
 
     if (!message) {
       return sendResponse(res, 404, false, "Message not found");
     }
 
-    return sendResponse(
-      res,
-      200,
-      true,
-      "Message retrieved successfully",
-      message
-    );
+    return sendResponse(res, 200, true, "Message retrieved successfully", message);
   } catch (error) {
     return handleError(res, error, "Failed to retrieve message");
   }
@@ -246,21 +219,10 @@ exports.getSessionMessages = async (req, res) => {
       .sort({ timestamp: 1 });
 
     if (!messages || messages.length === 0) {
-      return sendResponse(
-        res,
-        404,
-        false,
-        "No messages found for this session"
-      );
+      return sendResponse(res, 404, false, "No messages found for this session");
     }
 
-    return sendResponse(
-      res,
-      200,
-      true,
-      `Retrieved ${messages.length} session messages`,
-      messages
-    );
+    return sendResponse(res, 200, true, `Retrieved ${messages.length} session messages`, messages);
   } catch (error) {
     return handleError(res, error, "Failed to retrieve session messages");
   }
@@ -275,21 +237,11 @@ exports.addFeedback = async (req, res) => {
 
     // Enhanced validation
     if (rating && (rating < 1 || rating > 5 || !Number.isInteger(rating))) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        "Rating must be an integer between 1 and 5"
-      );
+      return sendResponse(res, 400, false, "Rating must be an integer between 1 and 5");
     }
 
     if (comment && comment.length > 500) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        "Comment too long (max 500 characters)"
-      );
+      return sendResponse(res, 400, false, "Comment too long (max 500 characters)");
     }
 
     const message = await Message.findOne({ _id: messageId, userId });
@@ -308,13 +260,7 @@ exports.addFeedback = async (req, res) => {
 
     await message.save();
 
-    return sendResponse(
-      res,
-      200,
-      true,
-      "Feedback added successfully",
-      message.feedback
-    );
+    return sendResponse(res, 200, true, "Feedback added successfully", message.feedback);
   } catch (error) {
     return handleError(res, error, "Failed to add feedback");
   }
