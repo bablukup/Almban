@@ -1,11 +1,11 @@
 const { validationResult } = require("express-validator");
 const logger = require("../utils/logger");
 
-const handleValidationError = (req, res, next) => {
+const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    //Log validation errors
+    // Log validation errors
     logger.warn("Validation failed", {
       path: req.path,
       method: req.method,
@@ -29,4 +29,4 @@ const handleValidationError = (req, res, next) => {
   next();
 };
 
-module.exports = { handleValidationError };
+module.exports = { handleValidationErrors };

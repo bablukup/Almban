@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -34,9 +35,9 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Get user and verify existence
-    const user = await User.findById(decoded.userId)
-      .select("-password -__v")
-      .lean();
+    // const user = await User.findById(decoded._id).select("-password -__v").lean();
+    const userId = new mongoose.Types.ObjectId(decoded._id);
+    const user = await User.findById(userId).select("-password -__v").lean();
 
     if (!user) {
       return res.status(401).json({

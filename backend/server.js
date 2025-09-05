@@ -1,12 +1,18 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
+const connectDB = require("./config/db");
+
+const userRoutes = require("./routes/userRoutes");
 const cors = require("cors");
+const messageRoutes = require("./routes/messageRoutes");
+
+// THIS IS THE CORRECT LOCATION TO IMPORT authMiddleware
+const authMiddleware = require("./middleware/authMiddleware");
 
 // Load env vars first
 dotenv.config();
+console.log("JWT_SECRET at startup:", process.env.JWT_SECRET);
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -42,8 +48,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
+// New message routes
+// Now, authMiddleware is defined before it's used
+app.use("/api/messages", authMiddleware, messageRoutes);
+
 // Protected route example
-const authMiddleware = require("./middleware/authMiddleware");
 app.get("/api/me", authMiddleware, (req, res) => {
   res.json({ user: req.user });
 });

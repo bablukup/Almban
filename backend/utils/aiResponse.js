@@ -40,22 +40,15 @@ const responseTemplates = {
  * @param {Object} options - Generation options
  * @returns {Object} Generated response with metadata
  */
-
 const generate = async (text, options = {}) => {
   try {
     const { emotion = { emotion: "neutral", intensity: 0.5 } } = options;
-
-    // Input validation
     if (!text || typeof text !== "string") {
       throw new Error("Invalid input text");
     }
 
     // Get appropriate response template
     const templateSet = responseTemplates[emotion.emotion] || responseTemplates.neutral;
-    if (!template) {
-      logger.warn(`No templates found for emotion: ${emotion.emotion}`);
-      template = responseTemplates.neutral;
-    }
     const randomIndex = Math.floor(Math.random() * templateSet.length);
     let response = templateSet[randomIndex];
 
@@ -66,10 +59,11 @@ const generate = async (text, options = {}) => {
     if (emotion.intensity > 0.7) {
       response += " I can sense this is really important to you.";
     }
+
     return {
       response: response.trim(),
       // Use confidence from the analyzer
-      confidence: options.emotion ? options.emotion.confidence : 0.5,
+      confidence: options.emotion?.confidence ?? 0.5,
       tokensUsed: response.split(" ").length,
       emotion: emotion.emotion,
       timestamp: new Date().toISOString(),
@@ -81,13 +75,14 @@ const generate = async (text, options = {}) => {
       options,
     });
 
+    // This is the key fix. We are returning a complete and valid object.
     return {
-      response: "I appreciate you sharing that with me. How can I help you today?",
+      response: "I'm sorry, I'm having trouble with that. Can you try rephrasing?",
       confidence: 0.3,
-      tokensUsed: 0,
+      // tokensUsed: 0,
       emotion: "neutral",
-      error: error.message,
-      timestamp: new Date().toISOString(),
+      // error: error.message,
+      // timestamp: new Date().toISOString(),
     };
   }
 };

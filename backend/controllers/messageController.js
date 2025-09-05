@@ -1,9 +1,10 @@
 const { Message, Emotion, Context, UserPreferences } = require("../models/Message");
-const emotionAnalyzer = require("../utils/emotionAnalyzer");
+const messageController = require("../controllers/messageController");
 const aiResponse = require("../utils/aiResponse");
 const contextManager = require("../utils/contextManager");
 const sanitizer = require("../utils/sanitizer");
-const logger = require("../utils/logger"); // Added logger
+const logger = require("../utils/logger");
+const emotionAnalyzer = require("../utils/emotionAnalyzer");
 
 // Helper function for consistent API responses
 const sendResponse = (res, statusCode, success, message, data = null) => {
@@ -50,7 +51,7 @@ exports.createMessage = async (req, res) => {
 
   try {
     const { text, sessionId, messageType = "text" } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const startTime = Date.now(); // Start response time tracking
 
     // 1. Input Validation and Sanitization
@@ -65,11 +66,11 @@ exports.createMessage = async (req, res) => {
       // A. Fetch User Preferences
       UserPreferences.findOne({ userId }),
       // B. Fetch Conversation History Summary
-      contextManager.getSummary(sessionId, userId),
+      contextManager.getRecentContext(userId, sessionId),
     ]);
 
     // 3. Analyze Emotion from User's Message
-    const emotionData = await emotionAnalyzer.analyze(sanitizedText);
+    const emotionData = await emotionAnalyzer.analyzer(sanitizedText);
 
     // 4. Generate AI Response
     const aiData = await aiResponse.generate(sanitizedText, {
@@ -92,9 +93,8 @@ exports.createMessage = async (req, res) => {
     const savedEmotion = await emotion.save();
 
     // B. Update or Save Context record
-    await contextManager.saveContext({
-      userId,
-      sessionId,
+    await contextManager.updateContext(userId, sessionId, {
+      // This is the single messageData object
       messageText: sanitizedText,
       aiResponse: aiData.response,
       emotion: emotionData.emotion,
@@ -136,7 +136,7 @@ exports.createMessage = async (req, res) => {
 // ---------------- GET MESSAGES ----------------
 exports.getMessages = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const { page = 1, limit = 20, sessionId } = req.query;
 
     const filter = { userId };
@@ -179,7 +179,7 @@ exports.getMessages = async (req, res) => {
 // ---------------- GET RECENT MESSAGES ----------------
 exports.getRecentMessages = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const limit = parseInt(req.query.limit) || 20;
 
     const messages = await Message.getRecentByIdUser(userId, Math.min(limit, 50));
@@ -194,7 +194,7 @@ exports.getRecentMessages = async (req, res) => {
 exports.getMessageById = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const message = await Message.findOne({ _id: messageId, userId }).populate("emotionId");
 
@@ -212,7 +212,7 @@ exports.getMessageById = async (req, res) => {
 exports.getSessionMessages = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const messages = await Message.find({ userId, sessionId })
       .populate("emotionId")
@@ -232,7 +232,7 @@ exports.getSessionMessages = async (req, res) => {
 exports.addFeedback = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const { rating, thumbsUp, comment } = req.body;
 
     // Enhanced validation

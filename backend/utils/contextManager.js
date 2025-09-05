@@ -23,6 +23,12 @@ const getRecentContext = async (userId, sessionId, limit = 10) => {
 
 const updateContext = async (userId, sessionId, messageData) => {
   try {
+    // Add a check to ensure userId and messageData are defined
+    if (!userId || !messageData) {
+      logger.error("Context update failed: Missing userId or messageData");
+      return;
+    }
+
     const contextUpdate = {
       messageText: messageData.messageText,
       aiResponse: messageData.aiResponse,
@@ -56,7 +62,6 @@ const updateContext = async (userId, sessionId, messageData) => {
     return context;
   } catch (error) {
     logger.error("Context update failed:", error);
-    throw error;
   }
 };
 

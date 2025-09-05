@@ -5,8 +5,6 @@ const rateLimit = require("express-rate-limit");
 
 // Controllers
 const messageController = require("../controllers/messageController");
-const emotionController = require("../controllers/emotionController");
-const analyticsController = require("../controllers/analyticsController");
 
 // Middleware
 const authMiddleware = require("../middleware/authMiddleware");
@@ -45,10 +43,7 @@ const createMessageValidation = [
 ];
 
 const getMessagesValidation = [
-  query("page")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer"),
+  query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer"),
 
   query("limit")
     .optional()
@@ -65,9 +60,9 @@ const getMessagesValidation = [
 // ---------------- MESSAGE CRUD ROUTES ----------------
 
 /**
- * @route   POST /api/messages
- * @desc    Create a new message
- * @access  Private
+ * @route   POST /api/messages
+ * @desc    Create a new message
+ * @access  Private
  */
 router.post(
   "/",
@@ -79,9 +74,9 @@ router.post(
 );
 
 /**
- * @route   GET /api/messages
- * @desc    Get user's messages with filtering and pagination
- * @access  Private
+ * @route   GET /api/messages
+ * @desc    Get user's messages with filtering and pagination
+ * @access  Private
  */
 router.get(
   "/",
@@ -93,9 +88,9 @@ router.get(
 );
 
 /**
- * @route   GET /api/messages/recent
- * @desc    Get user's recent messages (last 20)
- * @access  Private
+ * @route   GET /api/messages/recent
+ * @desc    Get user's recent messages (last 20)
+ * @access  Private
  */
 router.get(
   "/recent",
@@ -105,9 +100,9 @@ router.get(
 );
 
 /**
- * @route   GET /api/messages/:messageId
- * @desc    Get a specific message by ID
- * @access  Private
+ * @route   GET /api/messages/:messageId
+ * @desc    Get a specific message by ID
+ * @access  Private
  */
 router.get(
   "/:messageId",
@@ -118,9 +113,9 @@ router.get(
 );
 
 /**
- * @route   GET /api/messages/session/:sessionId
- * @desc    Get all messages from a specific session
- * @access  Private
+ * @route   GET /api/messages/session/:sessionId
+ * @desc    Get all messages from a specific session
+ * @access  Private
  */
 router.get(
   "/session/:sessionId",
@@ -132,9 +127,9 @@ router.get(
 );
 
 /**
- * @route   POST /api/messages/:messageId/feedback
- * @desc    Add feedback to a message
- * @access  Private
+ * @route   POST /api/messages/:messageId/feedback
+ * @desc    Add feedback to a message
+ * @access  Private
  */
 router.post(
   "/:messageId/feedback",
