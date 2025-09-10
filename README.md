@@ -86,7 +86,7 @@ Ensure you have the following software installed on your system:
     # From the /backend directory
     npm run dev
     ```
-    The server will start running on `http://localhost:5000`.
+    The server will start running on `http://localhost:8080`.
 
 2.  **Start the Frontend Application:**
     ```bash
