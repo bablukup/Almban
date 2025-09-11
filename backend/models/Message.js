@@ -147,7 +147,7 @@ const MessageSchema = new mongoose.Schema(
         enum: ["mobile", "desktop", "tablet"],
         default: "desktop",
       },
-      browser: { type: String, maxlength: 50 },
+      browser: { type: String, maxlength: 200 },
       responseTime: { type: Number }, // milliseconds
       messageLength: { type: Number }, // auto-calculated
       emojiCount: { type: Number, default: 0 },

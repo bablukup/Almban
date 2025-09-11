@@ -126,7 +126,12 @@ exports.createMessage = async (req, res) => {
 
     // 6. Send Response
     clearTimeout(timeout);
-    return sendResponse(res, 201, true, "Message created successfully", savedMessage);
+    return res.status(201).json({
+      success: true,
+      response: aiData.response,
+      emotion: emotionData.emotion,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     clearTimeout(timeout);
     return handleError(res, error, "Failed to create message");

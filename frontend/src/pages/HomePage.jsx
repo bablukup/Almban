@@ -5,28 +5,53 @@ import ChatInput from "../components/ChatInput";
 import { Heart, Sparkles } from "lucide-react";
 
 const HomePage = () => {
-  // FIXED: Empty initial state - no AI message
   const [messages, setMessages] = useState([]);
 
-  const handleSendMessage = (messageText) => {
-    const newMessage = {
-      id: messages.length + 1,
+  // FIXED: Handle the complex object from ChatInput
+  const handleSendMessage = (messageData) => {
+    console.log("📨 Received message data:", messageData);
+
+    // Extract user message
+    const userMessage = {
+      id: Date.now() + "_user",
       type: "user",
-      text: messageText,
-      timestamp: new Date(),
-      emotion: "neutral",
+      text: messageData.userMessage,
+      timestamp: messageData.timestamp,
+      emotion: "neutral", // You can enhance this later
     };
-    setMessages((prev) => [...prev, newMessage]);
+
+    // Add user message immediately
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Handle AI response from backend
+    if (messageData.backendResponse) {
+      const aiMessage = {
+        id: Date.now() + "_ai",
+        type: "ai",
+        text:
+          messageData.backendResponse.response ||
+          messageData.backendResponse.text ||
+          messageData.backendResponse.message ||
+          "I received your message!",
+        timestamp: new Date().toISOString(),
+        emotion: messageData.backendResponse.emotion || "calm",
+      };
+
+      // Add AI response after a short delay for better UX
+      setTimeout(() => {
+        setMessages((prev) => [...prev, aiMessage]);
+      }, 500);
+    }
   };
 
-  // NEW: Quick action button handler with AI responses
+  // Quick action button handler with AI responses
   const handleQuickAction = (emotion, text) => {
     // User message add
     const userMessage = {
-      id: messages.length + 1,
+      id: Date.now() + "_quick_user",
       type: "user",
       text: text,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       emotion: emotion,
     };
 
@@ -39,26 +64,26 @@ const HomePage = () => {
       switch (emotion) {
         case "happy":
           aiResponseText =
-            "That's wonderful, Bablu! 😊 I'm so glad you're feeling good today. What's making you feel happy? I'd love to hear about it!";
+            "That's wonderful! I'm so glad you're feeling good today. What's making you feel happy? I'd love to hear about it!";
           break;
         case "calm":
           aiResponseText =
-            "It's great that you're feeling calm, Bablu. 😌 Inner peace is so valuable. Would you like to talk about what's helping you feel this way?";
+            "It's great that you're feeling calm. Inner peace is so valuable. Would you like to talk about what's helping you feel this way?";
           break;
         case "sad":
           aiResponseText =
-            "I'm here for you, Bablu. 💙 It's okay to feel sad sometimes. Would you like to share what's on your mind? I'm listening.";
+            "I'm here for you. It's okay to feel sad sometimes. Would you like to share what's on your mind? I'm listening.";
           break;
         default:
           aiResponseText =
-            "Hello Bablu! I'm here to listen and support you. What would you like to talk about today? 💙";
+            "Hello! I'm here to listen and support you. What would you like to talk about today?";
       }
 
       const aiResponse = {
-        id: messages.length + 2,
+        id: Date.now() + "_quick_ai",
         type: "ai",
         text: aiResponseText,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         emotion: "calm",
       };
 
@@ -69,7 +94,7 @@ const HomePage = () => {
   return (
     <MainLayout>
       <div className="flex flex-col h-[calc(100vh-80px)]">
-        {/* FIXED: Welcome Header - Show when no messages */}
+        {/* Welcome Header - Show when no messages */}
         {messages.length === 0 && (
           <div className="flex-shrink-0 text-center py-12 px-6">
             <div className="flex justify-center mb-6">
@@ -85,7 +110,7 @@ const HomePage = () => {
               feeling. Share your thoughts, emotions, or just say hello.
             </p>
 
-            {/* FIXED: Functional Quick action buttons */}
+            {/* Quick action buttons */}
             <div className="flex flex-wrap justify-center gap-3 mt-8">
               <button
                 onClick={() =>

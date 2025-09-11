@@ -111,19 +111,6 @@ const ChatBubble = ({
         <div className="bg-white border border-gray-200 rounded-2xl rounded-tr-md p-4 shadow-md hover:shadow-lg transition-shadow">
           <p className="text-[#1F2937] leading-relaxed">{message}</p>
         </div>
-
-        {/* Emotion label */}
-        <div className="flex items-center gap-2 mt-2 mr-2 justify-end">
-          <span
-            className="text-xs italic font-light px-2 py-1 rounded-full"
-            style={{
-              color: emotionStyle.color,
-              backgroundColor: emotionStyle.color + "20",
-            }}
-          >
-            feeling {emotion}
-          </span>
-        </div>
       </div>
     </div>
   );
