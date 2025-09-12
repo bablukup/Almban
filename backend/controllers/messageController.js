@@ -122,8 +122,10 @@ exports.createMessage = async (req, res) => {
     });
 
     const savedMessage = await newMessage.save();
-    await savedMessage.populate("emotionId");
-
+    await savedMessage.populate({
+      path: "emotionId",
+      options: { lean: true },
+    });
     // 6. Send Response
     clearTimeout(timeout);
     return res.status(201).json({
@@ -201,7 +203,7 @@ exports.getMessageById = async (req, res) => {
     const { messageId } = req.params;
     const userId = req.user._id;
 
-    const message = await Message.findOne({ _id: messageId, userId }).populate("emotionId");
+    const message = await Message.findOne({ _id: messageId, userId }).populate("emotionId").lean();
 
     if (!message) {
       return sendResponse(res, 404, false, "Message not found");
@@ -221,7 +223,8 @@ exports.getSessionMessages = async (req, res) => {
 
     const messages = await Message.find({ userId, sessionId })
       .populate("emotionId")
-      .sort({ timestamp: 1 });
+      .sort({ timestamp: 1 })
+      .lean();
 
     if (!messages || messages.length === 0) {
       return sendResponse(res, 404, false, "No messages found for this session");

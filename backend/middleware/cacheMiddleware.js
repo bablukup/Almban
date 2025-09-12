@@ -1,15 +1,13 @@
 const { query } = require("express-validator");
 const NodeCache = require("node-cache");
+const logger = require("../utils/logger");
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 320 }); // 5 minutes default
 
 const cacheMiddleware = (duration = 300) => {
   return (req, res, next) => {
     try {
       // Create cache key based on user ID and request
-      const key = `${req.user.id}:${req.originalUrl}:${JSON.stringify(
-        req,
-        query
-      )}`;
+      const key = `${req.user.id}:${req.originalUrl}:${JSON.stringify(req, query)}`;
       const cachedResponse = cache.get(key);
 
       if (cachedResponse) {

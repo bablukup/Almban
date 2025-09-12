@@ -1,5 +1,4 @@
-// src/routes/index.jsx
-import AuthPage from "../pages/AuthPage";
-import HomePage from "../pages/HomePage";
+export { default as AuthPage } from "../pages/AuthPage";
+export { default as HomePage } from "../pages/HomePage";
 
-export { AuthPage, HomePage };
+export { default as AppRoutes } from "./AppRoutes";

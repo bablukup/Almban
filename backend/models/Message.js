@@ -228,11 +228,20 @@ MessageSchema.pre("save", function (next) {
 
 // ------------------ Static Methods ------------------
 MessageSchema.statics.getRecentByUser = function (userId, limit = 20) {
-  return this.find({ userId }).sort({ timestamp: -1 }).limit(limit).populate("emotionId").exec();
+  return this.find({ userId })
+    .sort({ timestamp: -1 })
+    .limit(limit)
+    .populate("emotionId")
+    .lean()
+    .exec();
+};
+
+MessageSchema.statics.getRecentByIdUser = function (userId, limit = 20) {
+  return this.getRecentByUser(userId, limit);
 };
 
 MessageSchema.statics.getSessionMessages = function (sessionId) {
-  return this.find({ sessionId }).sort({ timestamp: 1 }).populate("emotionId").exec();
+  return this.find({ sessionId }).sort({ timestamp: 1 }).populate("emotionId").lean().exec();
 };
 
 MessageSchema.statics.getEmotionAnalytics = function (userId, days = 30) {
