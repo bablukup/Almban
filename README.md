@@ -1,4 +1,4 @@
-# Almban (Āḷmban)
+# Āḷmban
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -116,7 +116,7 @@ Ensure you have the following software installed on your system:
 
 ## 🤝 How to Contribute
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. I would greatly appreciate any contributions you make.
 
 1.  **Fork** the Project.
 2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
