@@ -13,20 +13,20 @@ Almban is not just another chatbot; it's a safe and empathetic space designed to
 
 ## 🌟 Key Features
 
-* **💬 Empathetic AI Chat:** Share your feelings in a safe and non-judgmental environment.
-* **📱 Mobile-First Design:** An app-like experience that works beautifully on any device.
-* **🛡️ Privacy & Safety:** Your conversations are private and secure. We prioritize user safety above all.
-* **🚨 Emergency Support:** Redirects to trusted contacts or professional helplines in moments of severe distress.
+- **💬 Empathetic AI Chat:** Share your feelings in a safe and non-judgmental environment.
+- **📱 Mobile-First Design:** An app-like experience that works beautifully on any device.
+- **🛡️ Privacy & Safety:** Your conversations are private and secure. We prioritize user safety above all.
+- **🚨 Emergency Support:** Redirects to trusted contacts or professional helplines in moments of severe distress.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** React.js
-* **Backend:** Node.js, Express.js
-* **Database:** MongoDB
-* **AI Integration:** OpenAI API (for MVP), Hugging Face
-* **Deployment:** Vercel (Frontend), Render/Railway (Backend)
+- **Frontend:** React.js
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB
+- **AI Integration:** OpenAI API (for MVP), Hugging Face
+- **Deployment:** Vercel (Frontend), Render/Railway (Backend)
 
 ---
 
@@ -37,20 +37,23 @@ Follow these instructions to get a copy of the project up and running on your lo
 ### Prerequisites
 
 Ensure you have the following software installed on your system:
-* [Node.js](https://nodejs.org/) (v16 or newer)
-* [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-* [Git](https://git-scm.com/)
-* [MongoDB](https://www.mongodb.com/try/download/community) (for local installation)
+
+- [Node.js](https://nodejs.org/) (v16 or newer)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Git](https://git-scm.com/)
+- [MongoDB](https://www.mongodb.com/try/download/community) (for local installation)
 
 ### Installation
 
 1.  **Clone the repository:**
+
     ```bash
     git clone [https://github.com/your-username/almban.git](https://github.com/your-username/almban.git)
     cd almban
     ```
 
 2.  **Set up the Backend:**
+
     ```bash
     # Navigate to the backend directory
     cd backend
@@ -61,7 +64,9 @@ Ensure you have the following software installed on your system:
     # Create a .env file from the example
     cp .env.example .env
     ```
+
     Now, open the `backend/.env` file and add your configuration variables:
+
     ```env
     MONGO_URI=your_mongodb_connection_string
     OPENAI_API_KEY=your_openai_api_key
@@ -69,6 +74,7 @@ Ensure you have the following software installed on your system:
     ```
 
 3.  **Set up the Frontend:**
+
     ```bash
     # Navigate to the frontend directory from the root
     cd ../frontend
@@ -82,10 +88,12 @@ Ensure you have the following software installed on your system:
 ## 🏃‍♂️ Running the Application
 
 1.  **Start the Backend Server:**
+
     ```bash
     # From the /backend directory
     npm run dev
     ```
+
     The server will start running on `http://localhost:8080`.
 
 2.  **Start the Frontend Application:**
@@ -99,10 +107,10 @@ Ensure you have the following software installed on your system:
 
 ## 📅 Roadmap
 
--   [x] **Phase 1:** Build the MVP (basic emotional support chat).
--   [ ] **Phase 2:** Add personalization + mood detection.
--   [ ] **Phase 3:** Expand into a mobile app + global reach.
--   [ ] **Phase 4:** Train our own custom emotional AI model.
+- [x] **Phase 1:** Build the MVP (basic emotional support chat).
+- [ ] **Phase 2:** Add personalization + mood detection.
+- [ ] **Phase 3:** Expand into a mobile app + global reach.
+- [ ] **Phase 4:** Train our own custom emotional AI model.
 
 ---
 

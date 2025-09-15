@@ -5,6 +5,7 @@ const contextManager = require("../utils/contextManager");
 const sanitizer = require("../utils/sanitizer");
 const logger = require("../utils/logger");
 const emotionAnalyzer = require("../utils/emotionAnalyzer");
+const { default: mongoose } = require("mongoose");
 
 // Helper function for consistent API responses
 const sendResponse = (res, statusCode, success, message, data = null) => {
@@ -50,14 +51,19 @@ exports.createMessage = async (req, res) => {
   }, 30000);
 
   try {
-    const { text, sessionId, messageType = "text" } = req.body;
+    let { text, sessionId, messageType = "text" } = req.body;
     const userId = req.user._id;
     const startTime = Date.now(); // Start response time tracking
 
     // 1. Input Validation and Sanitization
-    if (!text || !sessionId) {
-      clearTimeout(timeout);
+    if (!text) {
       return sendResponse(res, 400, false, "Missing required fields");
+    }
+
+    let isNewConversation = false;
+    if (!sessionId) {
+      isNewConversation = true;
+      sessionId = new mongoose.Types.ObjectId().toString();
     }
     const sanitizedText = sanitizer.sanitizeText(text);
 
@@ -132,6 +138,8 @@ exports.createMessage = async (req, res) => {
       success: true,
       response: aiData.response,
       emotion: emotionData.emotion,
+      sessionId: sessionId,
+      isNew: isNewConversation,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -149,8 +157,16 @@ exports.getMessages = async (req, res) => {
     const filter = { userId };
     if (sessionId) filter.sessionId = sessionId;
 
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    let pageNum = parseInt(page, 10);
+    if (isNaN(pageNum) || pageNum < 1) {
+      pageNum = 1;
+    }
+
+    let limitNum = parseInt(limit, 10);
+    if (isNaN(limitNum) || limitNum < 1) {
+      limitNum = 20; // Default to 20 if invalid
+    }
+    limitNum = Math.min(100, limitNum);
     const skip = (pageNum - 1) * limitNum;
 
     // Enhanced query performance
@@ -252,23 +268,24 @@ exports.addFeedback = async (req, res) => {
       return sendResponse(res, 400, false, "Comment too long (max 500 characters)");
     }
 
-    const message = await Message.findOne({ _id: messageId, userId });
+    const updatePayload = { $set: {} };
 
-    if (!message) {
+    if (rating) updatePayload.$set["feedback.rating"] = rating;
+    if (typeof thumbsUp === "boolean") updatePayload.$set["feedback.thumbsUp"] = thumbsUp;
+    if (comment) updatePayload.$set["feedback.comment"] = sanitizer.sanitizeText(comment);
+    updatePayload.$set["feedback.submittedAt"] = new Date();
+
+    const updatedMessage = await Message.findOneAndUpdate(
+      { _id: messageId, userId },
+      updatePayload,
+      { new: true, lean: true }
+    );
+
+    if (!updatedMessage) {
       return sendResponse(res, 404, false, "Message not found");
     }
 
-    message.feedback = {
-      ...message.feedback,
-      rating,
-      thumbsUp,
-      comment: comment ? sanitizer.sanitizeText(comment) : undefined,
-      submittedAt: new Date(),
-    };
-
-    await message.save();
-
-    return sendResponse(res, 200, true, "Feedback added successfully", message.feedback);
+    return sendResponse(res, 200, true, "Feedback added successfully", updatedMessage.feedback);
   } catch (error) {
     return handleError(res, error, "Failed to add feedback");
   }
